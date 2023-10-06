@@ -21,14 +21,18 @@ def get_tokenizer_model(model_name):
         model_name,
         trust_remote_code=True,
         torch_dtype=torch.float32,
+    
+        #torch_dtype=torch.bfloat16,
         device_map="auto",
         use_cache=True,
-        load_in_8bit = True
+        load_in_8bit = True,
+        #llm_int8_enable_fp32_cpu_offload = True,
+        #load_in_4bit = True,
     )
     return tokenizer, model
 
 def run_inference(question, prompt_file="prompt.md", metadata_file="metadata.sql"):
-    tokenizer, model = get_tokenizer_model("defog/sqlcoder2")
+    tokenizer, model = get_tokenizer_model("defog/sqlcoder-7b")
     prompt = generate_prompt(question, prompt_file, metadata_file)
     
     # make sure the model stops generating at triple ticks
@@ -37,7 +41,7 @@ def run_inference(question, prompt_file="prompt.md", metadata_file="metadata.sql
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=300,
+        max_new_tokens=400,
         do_sample=False,
         num_beams=5, # do beam search with 5 beams for high quality results
     )
