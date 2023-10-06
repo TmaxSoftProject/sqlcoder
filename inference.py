@@ -20,9 +20,10 @@ def get_tokenizer_model(model_name):
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         trust_remote_code=True,
-        torch_dtype=torch.float16,
+        torch_dtype=torch.float32,
         device_map="auto",
         use_cache=True,
+        load_in_8bit = True
     )
     return tokenizer, model
 
