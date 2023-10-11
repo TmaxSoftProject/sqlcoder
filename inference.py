@@ -71,6 +71,7 @@ if __name__ == "__main__":
     print(run_inference(question))
     end = time.time()
 
+
     print("시간",end - start)
 
 
