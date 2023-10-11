@@ -1,4 +1,5 @@
 import torch
+import time
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import argparse
 import time
@@ -59,12 +60,17 @@ def run_inference(question, prompt_file="prompt.md", metadata_file="metadata.sql
 
 if __name__ == "__main__":
     # Parse arguments
+    torch.cuda.is_available()
     parser = argparse.ArgumentParser(description="Run inference on a question")
     parser.add_argument("-q","--question", type=str, help="Question to run inference on")
     args = parser.parse_args()
     question = args.question
     start = time.time()
     print("Loading a model and generating a SQL query for answering your question...")
+    start = time.time()
     print(run_inference(question))
     end = time.time()
-    print(end - start)
+
+    print("시간",end - start)
+
+
