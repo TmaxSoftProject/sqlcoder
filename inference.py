@@ -1,6 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import argparse
+import time
 
 def generate_prompt(question, prompt_file="prompt.md", metadata_file="metadata.sql"):
     with open(prompt_file, "r") as f:
@@ -20,19 +21,15 @@ def get_tokenizer_model(model_name):
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         trust_remote_code=True,
-        torch_dtype=torch.float32,
-    
-        #torch_dtype=torch.bfloat16,
+        torch_dtype=torch.bfloat16,
         device_map="auto",
         use_cache=True,
-        load_in_8bit = True,
-        #llm_int8_enable_fp32_cpu_offload = True,
-        #load_in_4bit = True,
+        #load_in_4bit = True
     )
     return tokenizer, model
 
 def run_inference(question, prompt_file="prompt.md", metadata_file="metadata.sql"):
-    tokenizer, model = get_tokenizer_model("defog/sqlcoder-7b")
+    tokenizer, model = get_tokenizer_model("defog/sqlcoder2")
     prompt = generate_prompt(question, prompt_file, metadata_file)
     
     # make sure the model stops generating at triple ticks
@@ -43,7 +40,7 @@ def run_inference(question, prompt_file="prompt.md", metadata_file="metadata.sql
         tokenizer=tokenizer,
         max_new_tokens=400,
         do_sample=False,
-        num_beams=5, # do beam search with 5 beams for high quality results
+        num_beams=1, # do beam search with 5 beams for high quality results
     )
     generated_query = (
         pipe(
@@ -66,5 +63,8 @@ if __name__ == "__main__":
     parser.add_argument("-q","--question", type=str, help="Question to run inference on")
     args = parser.parse_args()
     question = args.question
+    start = time.time()
     print("Loading a model and generating a SQL query for answering your question...")
     print(run_inference(question))
+    end = time.time()
+    print(end - start)
