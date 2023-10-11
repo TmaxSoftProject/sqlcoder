@@ -2,6 +2,7 @@ import torch
 import time
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import argparse
+import time
 
 def generate_prompt(question, prompt_file="prompt.md", metadata_file="metadata.sql"):
     with open(prompt_file, "r") as f:
@@ -24,6 +25,7 @@ def get_tokenizer_model(model_name):
         torch_dtype=torch.bfloat16,
         device_map="auto",
         use_cache=True,
+        #load_in_4bit = True
     )
     return tokenizer, model
 
@@ -63,8 +65,12 @@ if __name__ == "__main__":
     parser.add_argument("-q","--question", type=str, help="Question to run inference on")
     args = parser.parse_args()
     question = args.question
+    start = time.time()
     print("Loading a model and generating a SQL query for answering your question...")
     start = time.time()
     print(run_inference(question))
     end = time.time()
+
     print("시간",end - start)
+
+
