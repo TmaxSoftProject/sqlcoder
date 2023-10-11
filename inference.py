@@ -1,4 +1,5 @@
 import torch
+import time
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import argparse
 
@@ -20,7 +21,7 @@ def get_tokenizer_model(model_name):
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         trust_remote_code=True,
-        torch_dtype=torch.float16,
+        torch_dtype=torch.bfloat16,
         device_map="auto",
         use_cache=True,
     )
@@ -36,9 +37,9 @@ def run_inference(question, prompt_file="prompt.md", metadata_file="metadata.sql
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=300,
+        max_new_tokens=400,
         do_sample=False,
-        num_beams=5, # do beam search with 5 beams for high quality results
+        num_beams=1, # do beam search with 5 beams for high quality results
     )
     generated_query = (
         pipe(
@@ -57,9 +58,13 @@ def run_inference(question, prompt_file="prompt.md", metadata_file="metadata.sql
 
 if __name__ == "__main__":
     # Parse arguments
+    torch.cuda.is_available()
     parser = argparse.ArgumentParser(description="Run inference on a question")
     parser.add_argument("-q","--question", type=str, help="Question to run inference on")
     args = parser.parse_args()
     question = args.question
     print("Loading a model and generating a SQL query for answering your question...")
+    start = time.time()
     print(run_inference(question))
+    end = time.time()
+    print("시간",end - start)
